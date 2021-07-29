@@ -1,4 +1,4 @@
-console.log(`Art Up API ${process.env.npm_package_version}`);
+console.log(`Instanbul V2 API ${process.env.npm_package_version}`);
 
 require("dotenv").config();
 
@@ -13,7 +13,6 @@ const app = express();
 
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
-const detailRoute = require("./routes/details");
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -31,8 +30,7 @@ app.get("/api", (req, res) => {
 });
 
 app.use("/api/user", authRoute);
-// app.use("/api/posts", postRoute);
-// app.use("/api/details", detailRoute);
+app.use("/api/posts", postRoute);
 
 console.log("Establishing connection with database...");
 mongoose.connect(process.env.DB_STRING, {

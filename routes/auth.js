@@ -9,6 +9,155 @@ const Validation = require("../utility/validation");
 const verify = require("../middleware/verifyToken");
 
 /*
+Verb: GET
+Function: Fetch data for user specified by _id
+Authorization: None
+*/
+
+router.get("/data/:id", async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const userData = await User.findOne({ _id: id }).select({
+            _id: 1,
+            username: 1,
+            name: 1,
+            bio: 1,
+            avatarURL: 1,
+        });
+
+        if (userData) {
+            res.status(200).json({
+                message: "User fetched",
+                userData: userData,
+            });
+        } else {
+            res.status(404).json({
+                message: "Could not find user",
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            message: "Invalid id",
+        });
+    }
+});
+
+
+/*
+Verb: GET
+Function: Fetch data for the logged in user
+Authorization: User
+*/
+
+router.get("/data", verify, async (req, res) => {
+    const id = req.user._id;
+
+    try {
+        const userData = await User.findOne({ _id: id });
+
+        if (userData) {
+            res.status(200).json({
+                message: "User fetched",
+                userData: userData,
+            });
+        } else {
+            res.status(404).json({
+                message: "Could not find user",
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            message: "Invalid id",
+        });
+    }
+});
+
+/*
+Verb: PATCH
+Function: Updates data for the logged in user
+Authorization: User
+*/
+
+router.patch("/data", verify, async (req, res) => {
+    const id = req.user._id;
+
+    const validate = await Validation.editDataSchema.isValid(req.body);
+    if (!validate)
+        return res.status(400).json({
+            message: "Invalid input",
+        });
+
+    let newSettings = {};
+
+    if (req.body.username) {
+        try {
+            const userExists = await User.findOne({
+                username: req.body.username,
+            });
+
+            if (userExists) {
+                return res.status(409).json({
+                    message: "Username is taken",
+                });
+            } else {
+                newSettings.username = req.body.username;
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Could not update settings",
+            });
+        }
+    }
+
+    if (req.body.email) {
+        try {
+            const emailExists = await User.findOne({ email: req.body.email });
+
+            if (emailExists) {
+                newSettings.email = req.body.email;
+            } else {
+                return res.status(409).json({
+                    message: "E-mail is taken",
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Could not update settings",
+            });
+        }
+    }
+
+    if (req.body.password) {
+        const salt = await bcrypt.genSaltSync(10);
+        const hashed = await bcrypt.hashSync(req.body.password, salt);
+        newSettings.password = hashed;
+    }
+
+    if (Object.keys(newSettings).length <= 0)
+        return res.status(400).json({
+            message: "Invalid input",
+        });
+
+    try {
+        await User.updateOne({ _id: id }, newSettings);
+
+        res.status(200).json({
+            message: "Settings updated",
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Could not update settings",
+        });
+    }
+});
+
+/*
 Verb: POST
 Function: Create new user
 Authorization: None
