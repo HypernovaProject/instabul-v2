@@ -17,14 +17,14 @@ exports.createPostSchema = yup.object().shape({
     title: yup.string().max(60).required(),
     description: yup.string().max(1024).required(),
     price: yup.number().required(),
-    tags: yup.string().max(255).required(),
+    tags: yup.array().required(),
 });
 
 exports.editPostSchema = yup.object().shape({
     title: yup.string().max(60),
     description: yup.string().max(1024),
     price: yup.number(),
-    tags: yup.string().max(255),
+    tags: yup.array().required(),
 });
 
 exports.editDataSchema = yup.object().shape({

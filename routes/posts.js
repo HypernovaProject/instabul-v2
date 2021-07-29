@@ -2,6 +2,8 @@ const router = require("express").Router();
 
 const verify = require("../middleware/verifyToken");
 
+const User = require("../models/users");
+
 const Posts = require("../models/posts");
 
 const Validation = require("../utility/validation");
@@ -16,6 +18,47 @@ router.get("/all", verify, async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
     const postData = await Posts.find({})
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .exec();
+
+    const count = await Posts.countDocuments({});
+
+    if (postData && postData.length > 0) {
+        res.status(200).json({
+            postData,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+        });
+    } else {
+        res.status(404).json({
+            message: "Could not find any posts",
+        });
+    }
+});
+
+/*
+Verb: GET
+Function: Fetch data for all posts matching user's tags
+Authorization: User
+*/
+
+router.get("/matching", verify, async (req, res) => {
+    const _userId = req.user._id;
+    
+    const userData = await User.findOne({ _id: _userId });
+
+    const userTags = userData.tags;
+
+    if (!userTags) {
+        return res.status(400).json({
+            message: "No tags set",
+        });
+    }
+
+    const { page = 1, limit = 10 } = req.query;
+    
+    const postData = await Posts.find({ tags: { $in: userTags } })
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .exec();

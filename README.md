@@ -5,7 +5,7 @@ Back-end service for the HyperNova project (re-write)
 ## Endpoints
 
 ```
-Use Login
+User Login
 POST /api/user/login
 {
 	"username": "example@example.com",
@@ -35,6 +35,9 @@ PATCH /api/user/data
 
 Fetch all posts | Needs Auth
 GET /api/posts/all?page=<int>&limit=<int>
+
+Fetch posts that match the user's tags | Needs Auth
+GET /api/posts/matching?page=<int>&limit=<int>
 
 Create post | Needs Auth
 POST /api/posts/create

@@ -23,6 +23,7 @@ router.get("/data/:id", async (req, res) => {
             username: 1,
             name: 1,
             bio: 1,
+            tags: 1,
             avatarURL: 1,
         });
 
@@ -43,7 +44,6 @@ router.get("/data/:id", async (req, res) => {
         });
     }
 });
-
 
 /*
 Verb: GET
@@ -90,7 +90,7 @@ router.patch("/data", verify, async (req, res) => {
             message: "Invalid input",
         });
 
-    let newSettings = {};
+    let newSettings = req.body;
 
     if (req.body.username) {
         try {
@@ -147,12 +147,12 @@ router.patch("/data", verify, async (req, res) => {
         await User.updateOne({ _id: id }, newSettings);
 
         res.status(200).json({
-            message: "Settings updated",
+            message: "User data updated",
         });
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            message: "Could not update settings",
+            message: "Could not update user data",
         });
     }
 });

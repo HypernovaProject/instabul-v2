@@ -30,6 +30,12 @@ const userSchema = new mongoose.Schema({
         required: false,
         max: 412,
     },
+    tags: {
+        type: Array,
+        required: false,
+        min: 1,
+        max: 255,
+    },
     avatarURL: {
         type: String,
         required: false,
