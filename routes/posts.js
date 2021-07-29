@@ -79,6 +79,36 @@ router.get("/matching", verify, async (req, res) => {
 });
 
 /*
+Verb: GET
+Function: Searches posts close to the given title 
+Authorization: User
+*/
+
+router.get("/search/title/:title", verify, async (req, res) => {
+    const { title } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const postData = await Posts.find({ title: new RegExp(title, "i") })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .exec();
+
+    const count = await Posts.find({ title: new RegExp(title, "i") }).count();
+
+    if (postData && postData.length > 0) {
+        res.status(200).json({
+            postData,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+        });
+    } else {
+        res.status(404).json({
+            message: "Could not find any posts",
+        });
+    }
+});
+
+/*
 Verb: POST
 Function: Create new post
 Authorization: User

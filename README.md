@@ -39,6 +39,9 @@ GET /api/posts/all?page=<int>&limit=<int>
 Fetch posts that match the user's tags | Needs Auth
 GET /api/posts/matching?page=<int>&limit=<int>
 
+Search posts by title | Needs Auth
+GET /api/posts/search/title/:title
+
 Create post | Needs Auth
 POST /api/posts/create
 {
